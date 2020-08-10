@@ -10,6 +10,16 @@ using System.Collections.Generic;
 /// </summary>
 class WebSource_Webace
 {
+    static string cookies = null;
+    static void LoadCookies()
+    {
+        if (cookies == null)
+        {
+            if (File.Exists("cookies_webace.txt"))
+                cookies = File.ReadAllText("cookies_webace.txt");
+            else throw new Exception("Need Cookies string to download webace.");
+        }
+    }
 
     public static void WebSource_WebaceContent(string content_url)
     {
@@ -45,12 +55,11 @@ class WebSource_Webace
             Log.level = " ";
             WebSource_WebaceEpisode(ep_urls[i], dir);
         }
-
-
     }
-    public static void WebSource_WebaceEpisode(string url, string savePath)
+    public static void WebSource_WebaceEpisode(string url, string savePath = "")
     {
-        string json =Util.GetWebText(url + "json/");
+        LoadCookies();
+        string json = Util.GetWebText(url + "json/");
         Regex reg_img = new Regex("/img.*?jpg");
         var ms = reg_img.Matches(json);
         foreach (Match m in ms)
@@ -66,7 +75,7 @@ class WebSource_Webace
             req.Timeout = 50000;
             req.CookieContainer.SetCookies(
                 new Uri("https://web-ace.jp"),
-                "");
+                cookies);
             while (true)
                 try
                 {
@@ -81,7 +90,7 @@ class WebSource_Webace
                 }
                 catch (Exception)
                 {
-                    Log.log("[Warn]Retry");
+                    Log.log("[Warn]Retry "+img_url);
                 }
 
             Log.log("[Info]" + filename);
