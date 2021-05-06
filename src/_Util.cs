@@ -68,4 +68,13 @@ class Util
                 Log.log("[Warn]Retry");
             }
     }
+
+    public static string Trim(string str)
+    {
+        int s = 0, e = str.Length - 1;
+        for (; s < str.Length; s++) { if (str[s] == ' ' || str[s] == '\t' || str[s] == '\n' || str[s] == '\r') { } else break; }
+        for (; e >= 0; e--) { if (str[e] == ' ' || str[e] == '\t' || str[e] == '\n' || str[e] == '\r') { } else break; }
+        if (s <= e) return str.Substring(s, e - s + 1);
+        else return "";
+    }
 }

@@ -15,11 +15,11 @@ public class Log
         Console.ForegroundColor=ConsoleColor.White;
     }
     public static void Info(string s){
-        log("[Info ]"+s);
+        log("[Info]"+s);
     }
     public static void Warn(string s)
     {
-        log("[Warn ]"+s);
+        log("[Warn]"+s);
     }
     public static void Error(string s){
         log("[Error]"+s);
