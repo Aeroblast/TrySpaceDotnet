@@ -67,7 +67,7 @@ class WebSource_Webace
             string img_url = "https://web-ace.jp" + m.Value;
             string filename = Path.GetFileName(img_url);
             string filepath = Path.Combine(savePath, filename);
-            if (File.Exists(filepath)) continue;
+            if (File.Exists(filepath)) { Log.Info("Skip " + filepath); continue; }
             HttpWebRequest req = HttpWebRequest.CreateHttp(img_url);
             req.Referer = url;
             req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36";
@@ -90,7 +90,7 @@ class WebSource_Webace
                 }
                 catch (Exception)
                 {
-                    Log.log("[Warn]Retry "+img_url);
+                    Log.log("[Warn]Retry " + img_url);
                 }
 
             Log.log("[Info]" + filename);
