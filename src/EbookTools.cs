@@ -25,7 +25,40 @@ class EbookTools
             }
         }
         File.WriteAllLines(output_path, raw);
-        Log.Info("Saved" + output_path);
+        Log.Info("Saved " + output_path);
+    }
+
+    public static void ConcatenateText(string dir_path, string[] names)
+    {
+        List<string> txts = new List<string>();
+        txts.AddRange(Directory.GetFiles(dir_path, "*.txt"));
+        txts.Sort();
+        string output_path = Path.Combine(dir_path, "c");
+        Directory.CreateDirectory(output_path);
+        StringBuilder temp = new StringBuilder();
+        string temp_filename = Path.GetFileNameWithoutExtension(txts[0]);
+        int i = 0;
+        foreach (string txt in txts)
+        {
+            string n = Path.GetFileNameWithoutExtension(txt);
+            if (n == names[i])
+            {
+                File.WriteAllText(
+                    Path.Combine(output_path, temp_filename + ".txt"),
+                    temp.ToString()
+                    );
+                temp.Clear();
+                temp_filename=n;
+                i++;
+            }
+            string s=File.ReadAllText(txt);
+            temp.Append(s);
+        }
+        File.WriteAllText(
+            Path.Combine(output_path, temp_filename + ".txt"),
+            temp.ToString()
+            );
+
     }
 
 
