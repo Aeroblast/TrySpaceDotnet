@@ -15,15 +15,25 @@ class EbookTools
         string[] raw = File.ReadAllLines(raw_path);
         string[] text = File.ReadAllLines(text_path);
         int i = 0;
-        foreach (var t in text)
+        string error_temp = "";
+        try
         {
-            if (!t.StartsWith("#"))
+
+            foreach (var t in text)
             {
-                while ((raw[i].Length > 0) ? (raw[i][0] == '#') : false) i++;
-                raw[i] = t;
-                i++;
+                error_temp = t;
+                if (!t.StartsWith("#"))
+                {
+                    while ((raw[i].Length > 0) ? (raw[i][0] == '#') : false) i++;
+                    raw[i] = t;
+                    i++;
+                }
             }
+
         }
+        catch (IndexOutOfRangeException)
+        { Log.Error($"Index out of range: {error_temp} "); }
+
         File.WriteAllLines(output_path, raw);
         Log.Info("Saved " + output_path);
     }
@@ -41,17 +51,18 @@ class EbookTools
         foreach (string txt in txts)
         {
             string n = Path.GetFileNameWithoutExtension(txt);
-            if (n == names[i])
+            if(i<names.Length)
+            if (n.StartsWith(names[i]))
             {
                 File.WriteAllText(
                     Path.Combine(output_path, temp_filename + ".txt"),
                     temp.ToString()
                     );
                 temp.Clear();
-                temp_filename=n;
+                temp_filename = n;
                 i++;
             }
-            string s=File.ReadAllText(txt);
+            string s = File.ReadAllText(txt);
             temp.Append(s);
         }
         File.WriteAllText(
