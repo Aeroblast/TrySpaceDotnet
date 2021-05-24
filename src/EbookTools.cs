@@ -42,11 +42,14 @@ class EbookTools
     public static void RenameEpub(string path)
     {
         EpubFile epub = new EpubFile(path);
-        string author = "";
-        epub.ReadMeta();
-        if (epub.creatorRecords.Count > 0)
-            author = $"[{epub.creatorRecords[0].value}] ";
-        string dstFilename = author + epub.title + ".epub";
+        string[] creators = epub.creators;
+        string creatorStr = "";
+        if (creators.Length > 0)
+        {
+            creatorStr = $"[{creators[0]}] ";
+            //creatorStr = $"[{String.Join(',',creators)}] ";
+        }
+        string dstFilename = creatorStr + epub.title + ".epub";
         dstFilename = Util.FilenameCheck(dstFilename);
         File.Move(path, Path.Combine(Path.GetDirectoryName(path), dstFilename));
         Log.Info(path + " -> " + dstFilename);

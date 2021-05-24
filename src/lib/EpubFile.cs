@@ -104,6 +104,16 @@ namespace AeroEpub
         {
             get { if (titleRecords == null) ReadMeta(); return titleRecords[0].value; }
         }
+        public string[] creators
+        {
+            get
+            {
+                if (creatorRecords == null) ReadMeta();
+                string[] creators = new string[creatorRecords.Count];
+                for (int i = 0; i < creators.Length; i++) creators[i] = creatorRecords[i].value;
+                return creators;
+            }
+        }
         public string language
         {
             get
@@ -631,8 +641,8 @@ namespace AeroEpub
             this.id = id;
             this.mediaType = mediaType;
             this.properties = properties;
-            string dir=Path.GetDirectoryName(belongTo.packageFile.fullName);
-            href = Path.GetRelativePath(dir, entry.fullName).Replace('\\','/');
+            string dir = Path.GetDirectoryName(belongTo.packageFile.fullName);
+            href = Path.GetRelativePath(dir, entry.fullName).Replace('\\', '/');
         }
         public EpubFileEntry GetFile()
         {
