@@ -77,4 +77,19 @@ class Util
         if (s <= e) return str.Substring(s, e - s + 1);
         else return "";
     }
+    public static string FilenameCheck(string s)
+    {
+        if (s == null) return "";
+        return s
+        .Replace('?', '？')
+        .Replace('\\', '＼')
+        .Replace('/', '／')
+        .Replace(':', '：')
+        .Replace('*', '＊')
+        .Replace('"', '＂')
+        .Replace('|', '｜')
+        .Replace('<', '＜')
+        .Replace('>', '＞')
+        ;
+    }
 }
