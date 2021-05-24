@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using AeroEpub;
 
 /// <summary>
 ///  电子书文档相关
@@ -38,6 +39,19 @@ class EbookTools
         Log.Info("Saved " + output_path);
     }
 
+    public static void RenameEpub(string path)
+    {
+        EpubFile epub = new EpubFile(path);
+        string author = "";
+        epub.ReadMeta();
+        if (epub.creatorRecords.Count > 0)
+            author = $"[{epub.creatorRecords[0].value}] ";
+        string dstFilename = author + epub.title + ".epub";
+        dstFilename = Util.FilenameCheck(dstFilename);
+        File.Move(path, Path.Combine(Path.GetDirectoryName(path), dstFilename));
+        Log.Info(path + " -> " + dstFilename);
+    }
+
     public static void ConcatenateText(string dir_path, string[] names)
     {
         List<string> txts = new List<string>();
@@ -51,17 +65,17 @@ class EbookTools
         foreach (string txt in txts)
         {
             string n = Path.GetFileNameWithoutExtension(txt);
-            if(i<names.Length)
-            if (n.StartsWith(names[i]))
-            {
-                File.WriteAllText(
-                    Path.Combine(output_path, temp_filename + ".txt"),
-                    temp.ToString()
-                    );
-                temp.Clear();
-                temp_filename = n;
-                i++;
-            }
+            if (i < names.Length)
+                if (n.StartsWith(names[i]))
+                {
+                    File.WriteAllText(
+                        Path.Combine(output_path, temp_filename + ".txt"),
+                        temp.ToString()
+                        );
+                    temp.Clear();
+                    temp_filename = n;
+                    i++;
+                }
             string s = File.ReadAllText(txt);
             temp.Append(s);
         }
