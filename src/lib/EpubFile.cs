@@ -592,16 +592,17 @@ namespace AeroEpub
                                     break;
                                 default:
                                     using (var stm = entry.Open())
-
+                                    using (var mstm = new MemoryStream())
                                     {
-                                        byte[] d = new byte[entry.Length];
-                                        if (entry.Length < int.MaxValue)
+                                        stm.CopyTo(mstm);
+                                        byte[] d = mstm.ToArray();
+                                        if (d.Length != entry.Length)
                                         {
-                                            stm.Read(d, 0, (int)entry.Length);
-                                            var i = new EpubFileEntry(entry.FullName, d);
-                                            entries.Add(i);
+                                            throw new EpubErrorException("Read binary error");
                                         }
-                                        else { throw new EpubErrorException("File size exceeds the limit."); }
+                                        var i = new EpubFileEntry(entry.FullName, d);
+                                        entries.Add(i);
+
                                     }
                                     break;
                             }
