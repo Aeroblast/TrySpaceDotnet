@@ -10,7 +10,9 @@ using AeroEpub;
 /// </summary>
 class EbookTools
 {
+    /// <summary>
     //将纯txt稿与生肉生成的注释文档合并。
+    /// </summary>
     public static void MergeAtxt(string raw_path, string text_path, string output_path = "temp.atxt")
     {
         string[] raw = File.ReadAllLines(raw_path);
@@ -59,6 +61,7 @@ class EbookTools
     {
         List<string> txts = new List<string>();
         txts.AddRange(Directory.GetFiles(dir_path, "*.txt"));
+        txts.AddRange(Directory.GetFiles(dir_path, "*.atxt"));
         txts.Sort();
         string output_path = Path.Combine(dir_path, "c");
         Directory.CreateDirectory(output_path);
@@ -88,7 +91,6 @@ class EbookTools
             );
 
     }
-
 
     /// <summary>
     ///  将KindleUnpack的epub和DumpAZW6.py的高清图合并，必须存在封面图用于计算offset。在高清图文件夹中创建文件夹"rename"存放输出。
@@ -129,5 +131,50 @@ class EbookTools
             string name = "image" + Util.Number(int.Parse(m.Groups[1].Value) + offset, 5) + Path.GetExtension(n);
             File.Copy(n, Path.Combine(hdimgDir, "rename", name));
         }
+    }
+
+    /// <summary>
+    //输出ID
+    /// </summary>
+    public static void ExportEpubIdentifier(string rootPath)
+    {
+        foreach (string file in Directory.EnumerateFiles(rootPath, "*.epub", SearchOption.AllDirectories))
+        {
+            EpubFile epub = new EpubFile(file);
+            epub.ReadMeta();
+            string id = epub.uniqueIdentifier.value;
+            string relativePath = Path.GetRelativePath(rootPath, file);
+            Log.log(id + " " + relativePath);
+        }
+        Log.Save("log.txt");
+    }
+
+
+    public static int CharacterCount(EpubFile epub)
+    {
+        epub.ReadMeta();
+        int count = 0;
+        foreach (var itemref in epub.spine)
+        {
+            var file = (TextEpubFileEntry)itemref.item.GetFile();
+            count += Regex.Replace(file.text, "<[\\s\\S]*?>", "").Length;
+        }
+        return count;
+    }
+
+
+    public static void ChangeWritingDirection(EpubFile epub)
+    {
+        epub.ReadMeta();
+        epub.spine.pageProgressionDirection = "ltr";
+        foreach (var pair in epub.manifest)
+        {
+            if (pair.Value.mediaType == "text/css" || pair.Value.mediaType == "application/xhtml+xml")
+            {
+                var entry = pair.Value.GetFile() as TextEpubFileEntry;
+                entry.text = entry.text.Replace("vertical-rl", "horizontal-tb");
+            }
+        }
+        epub.WriteMeta3();
     }
 }
