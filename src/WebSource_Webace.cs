@@ -3,6 +3,7 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Net;
+using System.Net.Http;
 using System.Collections.Generic;
 
 /// <summary>
@@ -62,38 +63,35 @@ class WebSource_Webace
         string json = Util.GetWebText(url + "json/");
         Regex reg_img = new Regex("/img.*?jpg");
         var ms = reg_img.Matches(json);
+        var baseAddress = new Uri("https://web-ace.jp");
+        var handler = new HttpClientHandler() { UseCookies = false };
+        var httpClient = new HttpClient(handler) { BaseAddress = baseAddress };
         foreach (Match m in ms)
         {
             string img_url = "https://web-ace.jp" + m.Value;
             string filename = Path.GetFileName(img_url);
             string filepath = Path.Combine(savePath, filename);
             if (File.Exists(filepath)) { Log.Info("Skip " + filepath); continue; }
-            HttpWebRequest req = HttpWebRequest.CreateHttp(img_url);
-            req.Referer = url;
-            req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36";
-            req.CookieContainer = new CookieContainer();
-            req.Timeout = 50000;
-            req.CookieContainer.SetCookies(
-                new Uri("https://web-ace.jp"),
-                cookies);
-            while (true)
-                try
-                {
-                    using (var res = req.GetResponse())
-                    using (var s = res.GetResponseStream())
-                    using (var file = File.OpenWrite(filepath))
-                    {
 
-                        s.CopyTo(file);
-                        break;
-                    }
-                }
-                catch (Exception)
+            using (var req = new HttpRequestMessage(HttpMethod.Get, img_url))
+            {
+                req.Headers.Add("UserAgent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36");
+                req.Headers.Add("Referer", url);
+                req.Headers.Add("Cookies", cookies);
+                var responseMessage = httpClient.SendAsync(req).Result;
+                responseMessage.EnsureSuccessStatusCode();
+                using (var webstm = responseMessage.Content.ReadAsStream())
+                using (var file = File.OpenWrite(filepath))
                 {
-                    Log.log("[Warn]Retry " + img_url);
+                    webstm.CopyTo(file);
                 }
-
+            }
+            
             Log.log("[Info]" + filename);
+
         }
+        httpClient.Dispose();
+        handler.Dispose();
     }
 }
