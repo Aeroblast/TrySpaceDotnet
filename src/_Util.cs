@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Http;
 class Util
 {
 
@@ -22,51 +23,42 @@ class Util
     }
     public static string GetWebText(string url)
     {
-        Log.log("[Info]Try dl " + url);
-        while (true)
-            try
+        var baseAddress = new Uri(url);
+        using (var handler = new HttpClientHandler() { UseCookies = false })
+        using (var httpClient = new HttpClient(handler) { BaseAddress = baseAddress })
+        using (var req = new HttpRequestMessage(HttpMethod.Get, url))
+        {
+            req.Headers.Add("UserAgent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36");
+            var responseMessage = httpClient.SendAsync(req).Result;
+            responseMessage.EnsureSuccessStatusCode();
+            using (var webstm = responseMessage.Content.ReadAsStream())
+            using (var tr = new StreamReader(webstm))
             {
-                HttpWebRequest req = HttpWebRequest.CreateHttp(url);
-                req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36";
-                using (var res = req.GetResponse())
-                using (var s = res.GetResponseStream())
-                using (var reader = new StreamReader(s))
-                {
-                    var r = reader.ReadToEnd();
-                    Log.log("[Info]dl OK.");
-                    return r;
-                }
+                return tr.ReadToEnd();
             }
-            catch (Exception)
-            {
-                Log.log("[Warn]Retry");
-            }
+        }
     }
     public static void GetWebBinary(string img_url, string filepath, string referer = "")
     {
-        HttpWebRequest req = HttpWebRequest.CreateHttp(img_url);
-        req.Referer = referer;
-        req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36";
-        req.CookieContainer = new CookieContainer();
-        req.Timeout = 50000;
-        //req.CookieContainer.SetCookies(S
-        //  new Uri(""),
-        // "");
-        while (true)
-            try
+        var baseAddress = new Uri(img_url);
+        var handler = new HttpClientHandler() { UseCookies = false };
+        var httpClient = new HttpClient(handler) { BaseAddress = baseAddress };
+        using (var req = new HttpRequestMessage(HttpMethod.Get, img_url))
+        {
+            req.Headers.Add("UserAgent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36");
+            req.Headers.Add("Referer", referer);
+            var responseMessage = httpClient.SendAsync(req).Result;
+            responseMessage.EnsureSuccessStatusCode();
+            using (var webstm = responseMessage.Content.ReadAsStream())
+            using (var file = File.OpenWrite(filepath))
             {
-                using (var res = req.GetResponse())
-                using (var s = res.GetResponseStream())
-                using (var file = File.OpenWrite(filepath))
-                {
-                    s.CopyTo(file);
-                    break;
-                }
+                webstm.CopyTo(file);
             }
-            catch (Exception)
-            {
-                Log.log("[Warn]Retry");
-            }
+        }
+        httpClient.Dispose();
+        handler.Dispose();
     }
 
     public static string Trim(string str)
