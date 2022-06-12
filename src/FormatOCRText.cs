@@ -65,6 +65,7 @@ class FormatOCRText
                 {
                     case "\u2015"://日文
                     case "\u2014"://中文——
+                    case "|":
                     case "-":
                         sb.Append("\u2015");
                         continue;
