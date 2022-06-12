@@ -71,6 +71,15 @@ class FormatOCRText
                     case "~":
                         sb.Append("～");
                         continue;
+                    case "(":
+                        sb.Append("（");
+                        continue;
+                    case ")":
+                        sb.Append('）');
+                        continue;
+                    case "○":
+                        sb.Append('〇');
+                        continue;
                 }
                 if (Array.Exists(knownAllow, x => s == x))
                 {
@@ -93,7 +102,8 @@ class FormatOCRText
 
                     default:
                         Console.WriteLine(rune);
-                        throw new Exception("debug");
+                        throw new Exception($"File: {Path.GetFileName(path)}\nTarget:{line}");
+                        //sb.Append(rune);break;// for all through
                 }
 
             }
@@ -174,7 +184,7 @@ class FormatOCRText
             if (c == '「')
             {
                 var c_1 = concated[pos - 1];
-                if (c_1 != '\r' && c_1 != '\n')
+                if (c_1 != '\r' && c_1 != '\n' && c_1 != '」')
                 {
                     sb.Append(concated.Substring(lastPos, pos - lastPos));
                     sb.Append(Environment.NewLine);
