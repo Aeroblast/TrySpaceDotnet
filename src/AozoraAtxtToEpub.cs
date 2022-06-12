@@ -9,6 +9,78 @@ using AeroEpub;
 
 class AozoraText
 {
+
+    public static EpubFile AtxtEpub2JaStyle(string epub_path)
+    {
+        EpubFile epub = new EpubFile(epub_path);
+        epub.ReadMeta();
+        epub.GetFile<TextEpubFileEntry>("META-INF/container.xml").text = container;
+        var opf = epub.packageFile;
+        opf.fullName = "item/standard.opf";
+
+        epub.entries.Remove(epub.GetFile("OEBPS/toc.ncx"));
+        foreach (var entry in epub.entries)
+        {
+            if (entry.fullName.StartsWith("OEBPS/Text/") && entry.fullName.Length > "OEBPS/Text/".Length)
+            {
+                //假定：均有“有意义的名称”
+                entry.fullName = "item/xhtml/p-" + Path.GetFileName(entry.fullName).Substring("atxt00_".Length);
+                var textEntry = entry as TextEpubFileEntry;
+                textEntry.text = textEntry.text
+                .Replace("../Styles/Style.css", "../style.css")
+                .Replace(" class=\"atxt_drawout\"", "")
+                .Replace("atxt_breakall", "line-break-loose word-break-break-all")
+                ;
+                textEntry.text = Regex.Replace(
+                    textEntry.text,
+                    "<div class=\"atxt_aligned atxt_illu.*?/Images/(.*?jpg).*?>",
+                     "<p><img class=\"fit\" src=\"../image/$1\" alt=\"\"/></p>"
+                    );
+            }
+            if (entry.fullName.StartsWith("OEBPS/Images/") && entry.fullName.Length > "OEBPS/Images/".Length)
+            {
+                entry.fullName = "item/image/" + Path.GetFileName(entry.fullName);
+            }
+            if (entry.fullName.EndsWith("nav.xhtml"))
+            {
+                entry.fullName = "item/navigation-documents.xhtml";
+                var textEntry = entry as TextEpubFileEntry;
+                textEntry.text = Regex.Replace(textEntry.text, "href=\"Text/atxt[0-9]{2}_(.*?)\"", "href=\"xhtml/p-$1\"");
+            }
+            if (entry.fullName.EndsWith(".css"))
+            {
+                entry.fullName = "item/style.css";
+                var textEntry = entry as TextEpubFileEntry;
+                var t = "/* End of AeroNovelTool Template CSS */";
+                textEntry.text = textEntry.text.Substring(textEntry.text.IndexOf(t) + t.Length + 1);
+            }
+        }
+        epub.DeleteEmpty();//每次只查了一层所以两遍
+        epub.DeleteEmpty();
+        epub.manifest.Remove("ncx");
+        epub.manifest["nav.xhtml"].href = "navigation-documents.xhtml";
+        var cssItem = epub.manifest["Style.css"];
+        cssItem.href = "style.css";
+        cssItem.id = "style-ja";
+        foreach (var (id, item) in epub.manifest)
+        {
+            item.id = Path.GetFileNameWithoutExtension(item.id);
+            if (item.href.StartsWith("Text/"))
+            {
+                item.id = "p-" + item.id.Substring("atxt00_".Length);
+                item.href = "xhtml/p-" + Path.GetFileName(item.href).Substring("atxt00_".Length);
+            }
+            if (item.href.StartsWith("Images/"))
+            {
+                item.href = "image/" + Path.GetFileName(item.href);
+            }
+
+        }
+        epub.spine.pageProgressionDirection = "rtl";
+        epub.spine.toc = null;
+        epub.WriteMeta3();
+        return epub;
+    }
     public static void FormatDir(string dir)
     {
         var x = Directory.GetFiles(dir, "*.atxt");
