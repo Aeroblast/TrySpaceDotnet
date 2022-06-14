@@ -16,13 +16,14 @@ class FormatOCRText
         var r = GetOutput("pandoc.exe", $"{path} -t plain");
         r = Regex.Replace(r, "\r\n\r\n", "\r\n");
         r = Regex.Replace(r, " ", "");
-        r = Regex.Replace(r, "[.]+", "……");
+        r = Regex.Replace(r, "[.]{2,8}", "……");
         r = r.Replace("[]", "");//pandoc 处理图片剩下的东西
         var lines = r.Split("\r\n");
         var processedLines = new List<string>();
         var knownAllow = new string[] {
             "「", "」", "『", "』", "、", "。","々" ,
-            "！", "？", "《", "》", "…", "?", "!" ,"*","〝","〟"
+            "！", "？", "《", "》", "…", "?", "!" ,"*","〝","〟",
+            "←"
             };
         var knownForbi = new string[] { "[", "]" };
         var indentChar = new char[] { '『', '「', '（' };
@@ -79,6 +80,7 @@ class FormatOCRText
                         sb.Append('）');
                         continue;
                     case "○":
+                    case "〇":
                         sb.Append('〇');
                         continue;
                 }
@@ -98,6 +100,7 @@ class FormatOCRText
                     case CodeHandling.CodeType.CJKChar:
                     case CodeHandling.CodeType.HWLetterNumber:
                     case CodeHandling.CodeType.FWLetterNumber:
+                    case CodeHandling.CodeType.FWSpace:
                         sb.Append(rune);
                         break;
 
