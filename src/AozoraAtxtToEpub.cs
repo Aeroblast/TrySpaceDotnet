@@ -19,6 +19,7 @@ class AozoraText
         opf.fullName = "item/standard.opf";
 
         epub.entries.Remove(epub.GetFile("OEBPS/toc.ncx"));
+        Regex reg_html_tag = new Regex("<html[\\w\\W].*?>");
         foreach (var entry in epub.entries)
         {
             if (entry.fullName.StartsWith("OEBPS/Text/") && entry.fullName.Length > "OEBPS/Text/".Length)
@@ -33,9 +34,18 @@ class AozoraText
                 ;
                 textEntry.text = Regex.Replace(
                     textEntry.text,
-                    "<div class=\"atxt_aligned atxt_illu.*?/Images/(.*?jpg).*?>",
-                     "<p><img class=\"fit\" src=\"../image/$1\" alt=\"\"/></p>"
+                    "<div class=\"atxt_aligned atxt_illu.*?/Images/(.*?\\.jpg)\".*?</div>",
+                    "<p><img class=\"fit\" src=\"../image/$1\" alt=\"\"/></p>"
                     );
+                switch (Path.GetFileNameWithoutExtension(entry.fullName))
+                {
+                    case "p-colophon":
+                        textEntry.text = reg_html_tag.Replace(textEntry.text, html_tag_hltr, 1);
+                        break;
+                    default:
+                        textEntry.text = reg_html_tag.Replace(textEntry.text, html_tag_vrtl, 1);
+                        break;
+                }
             }
             if (entry.fullName.StartsWith("OEBPS/Images/") && entry.fullName.Length > "OEBPS/Images/".Length)
             {
@@ -158,23 +168,19 @@ class AozoraText
         File.WriteAllLines(txt_path, result);
     }
 
-    const string xhtml_template = @"<?xml version=""1.0"" encoding=""UTF-8""?>
-<!DOCTYPE html>
-<html
+    const string html_tag_vrtl = @"<html
  xmlns=""http://www.w3.org/1999/xhtml""
  xmlns:epub=""http://www.idpf.org/2007/ops""
  xml:lang=""ja""
  class=""vrtl""
->
-<head>
-  <meta charset=""UTF-8""/>
-  <title>{title}</title>
-  <link rel=""stylesheet"" type=""text/css"" href=""../style/book-style.css""/>
-</head>
-<body>
-{body}
-</body>
-</html>";
+>";
+
+    const string html_tag_hltr = @"<html
+ xmlns=""http://www.w3.org/1999/xhtml""
+ xmlns:epub=""http://www.idpf.org/2007/ops""
+ xml:lang=""ja""
+ class=""hltr""
+>";
     const string container =
    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">\n    <rootfiles>\n        <rootfile full-path=\"item/standard.opf\" media-type=\"application/oebps-package+xml\"/>\n    </rootfiles>\n</container>";
 
