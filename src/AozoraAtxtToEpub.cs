@@ -91,7 +91,7 @@ class AozoraText
         epub.WriteMeta3();
         return epub;
     }
-    public static void FormatDir(string dir)
+    public static void FormatAtxtDir(string dir)
     {
         var x = Directory.GetFiles(dir, "*.atxt");
         var iter = x.Where(f =>
@@ -106,8 +106,8 @@ class AozoraText
     }
     public static void FormatAtxt(string txt_path)
     {
-        var indentChar = new char[] { '『', '「', '（' };
-        var noSpaceChar = new char[] { '！', '？', '!', '?', '」', '　' };
+        var indentChar = new char[] { '『', '「', '（', '〝' };
+        var noSpaceChar = new char[] { '！', '？', '!', '?', '」', '　', '―', '…', '）' };
         var lines = File.ReadAllLines(txt_path);
         var result = new List<string>();
         foreach (var line in lines)
