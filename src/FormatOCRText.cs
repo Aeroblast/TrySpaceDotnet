@@ -16,14 +16,14 @@ class FormatOCRText
         var r = GetOutput("pandoc.exe", $"{path} -t plain");
         r = Regex.Replace(r, "\r\n\r\n", "\r\n");
         r = Regex.Replace(r, " ", "");
-        r = Regex.Replace(r, "[.]{2,8}", "……");
+        r = Regex.Replace(r, "[.]{2,10}", "……");
         r = r.Replace("[]", "");//pandoc 处理图片剩下的东西
         var lines = r.Split("\r\n");
         var processedLines = new List<string>();
         var knownAllow = new string[] {
             "「", "」", "『", "』", "、", "。","々" ,
             "！", "？", "《", "》", "…", "?", "!" ,"*","〝","〟",
-            "←"
+            "←","="
             };
         var knownForbi = new string[] { "[", "]" };
         var indentChar = new char[] { '『', '「', '（' };
@@ -71,6 +71,7 @@ class FormatOCRText
                         sb.Append("\u2015");
                         continue;
                     case "~":
+                    case "〜":
                         sb.Append("～");
                         continue;
                     case "(":
