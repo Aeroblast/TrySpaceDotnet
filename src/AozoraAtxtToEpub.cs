@@ -37,6 +37,11 @@ class AozoraText
                     "<div class=\"atxt_aligned atxt_illu.*?/Images/(.*?\\.jpg)\".*?</div>",
                     "<p><img class=\"fit\" src=\"../image/$1\" alt=\"\"/></p>"
                     );
+                textEntry.text = Regex.Replace(
+                    textEntry.text,
+                    "<a href=\"atxt[0-9]{2}_(.*?.xhtml)\">",
+                    "<a href=\"p-$1\">"
+                );
                 switch (Path.GetFileNameWithoutExtension(entry.fullName))
                 {
                     case "p-colophon":
