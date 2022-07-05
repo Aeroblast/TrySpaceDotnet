@@ -361,6 +361,16 @@ namespace AeroEpub
             WriteMeta3Helper_WriteDcMeta(languageRecords, sb);
             WriteMeta3Helper_WriteDcMeta(identifierRecords, sb);
             WriteMeta3Helper_WriteDcMeta(otherRecords, sb);
+            foreach (var m in meta)
+            {
+                sb.Append("        ");
+                sb.Append("<meta");
+                sb.Append(" property=\"" + m.name + "\"");
+                sb.Append(">");
+                sb.Append(m.value);
+                sb.Append("</meta>");
+                sb.Append("\n");
+            }
             sb.Append("\n");
             sb.Append("    </metadata>\n");
 
