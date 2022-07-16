@@ -23,7 +23,7 @@ class FormatOCRText
         var knownAllow = new string[] {
             "「", "」", "『", "』", "、", "。","々" ,
             "！", "？", "《", "》", "…", "?", "!" ,"*","〝","〟",
-            "←","="
+            "←", "→", "="
             };
         var knownForbi = new string[] { "[", "]" };
         var indentChar = new char[] { '『', '「', '（' };
@@ -53,7 +53,7 @@ class FormatOCRText
             line = Regex.Replace(line, "[！？!?]+", m =>
             {
                 var all = m.ToString().Replace("?", "？").Replace("!", "！");
-                if (all.Length > 2) throw new Exception("!?");
+                if (all.Length > 2) Log.Warn("too many !? ："+line);
                 if (all.Length == 2) return all.Replace("？", "?").Replace("！", "!");
                 return all;
 
