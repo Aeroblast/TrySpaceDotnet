@@ -13,17 +13,17 @@ class FormatOCRText
 {
     public static string[] ProcessFile(string path)
     {
-        var r = GetOutput("pandoc.exe", $"{path} -t plain");
+        var r = GetOutput("pandoc.exe", $"\"{path}\" -t plain");
         r = Regex.Replace(r, "\r\n\r\n", "\r\n");
         r = Regex.Replace(r, " ", "");
-        r = Regex.Replace(r, "[.]{2,10}", "……");
+        r = Regex.Replace(r, "[.•・·]{2,99}", m => new string('…', m.Value.Length / 3));
         r = r.Replace("[]", "");//pandoc 处理图片剩下的东西
         var lines = r.Split("\r\n");
         var processedLines = new List<string>();
         var knownAllow = new string[] {
             "「", "」", "『", "』", "、", "。","々" ,
             "！", "？", "《", "》", "…", "?", "!" ,"*","〝","〟",
-            "←", "→", "="
+            "←", "→", "=", "☆", "♪"
             };
         var knownForbi = new string[] { "[", "]" };
         var indentChar = new char[] { '『', '「', '（' };
@@ -53,7 +53,7 @@ class FormatOCRText
             line = Regex.Replace(line, "[！？!?]+", m =>
             {
                 var all = m.ToString().Replace("?", "？").Replace("!", "！");
-                if (all.Length > 2) Log.Warn("too many !? ："+line);
+                if (all.Length > 2) Log.Warn("too many !? ：" + line);
                 if (all.Length == 2) return all.Replace("？", "?").Replace("！", "!");
                 return all;
 
@@ -66,9 +66,10 @@ class FormatOCRText
                 {
                     case "\u2015"://日文
                     case "\u2014"://中文——
+                    case "─":
                     case "|":
                     case "-":
-                        sb.Append("\u2015");
+                        sb.Append("─");
                         continue;
                     case "~":
                     case "〜":
@@ -124,8 +125,8 @@ class FormatOCRText
             }
             inText = true;
 
-            processedLine = Regex.Replace(processedLine, "[\u2015]+",
-             m => m.ToString().Length <= 1 ? "\u2015\u2015" : m.ToString()
+            processedLine = Regex.Replace(processedLine, "[─]+",
+             m => m.ToString().Length <= 1 ? "─" : m.ToString()
             );
             if (!Array.Exists(indentChar, x => processedLine[0] == x))
             {
@@ -202,20 +203,23 @@ class FormatOCRText
             else
             {
                 // '」'
-                var c_1 = concated[pos + 1];
-                if (c_1 != '\r' && c_1 != '\n')
+                if (pos + 1 < concated.Length)
                 {
-                    sb.Append(concated.Substring(lastPos, pos - lastPos + 1));
-                    sb.Append(Environment.NewLine);
-                    if (concated[pos + 2] != '「')
+                    var c_1 = concated[pos + 1];
+                    if (c_1 != '\r' && c_1 != '\n')
                     {
-                        sb.Append('　');// Full width 
+                        sb.Append(concated.Substring(lastPos, pos - lastPos + 1));
+                        sb.Append(Environment.NewLine);
+                        if (concated[pos + 2] != '「')
+                        {
+                            sb.Append('　');// Full width 
+                        }
+                        pos++;
                     }
-                    pos++;
-                }
-                else
-                {
-                    sb.Append(concated.Substring(lastPos, pos - lastPos));
+                    else
+                    {
+                        sb.Append(concated.Substring(lastPos, pos - lastPos));
+                    }
                 }
             }
             lastPos = pos;
