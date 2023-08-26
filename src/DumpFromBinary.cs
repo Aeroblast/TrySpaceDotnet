@@ -59,10 +59,3 @@ class DumpFromBinary
         }
     }
 }
-class DumpSetting
-{
-    public byte[] fileStartSign;
-    public byte[] fileEndSign;
-    public string extension;
-    public uint minLength = 0;
-}
