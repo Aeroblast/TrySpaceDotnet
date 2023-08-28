@@ -16,7 +16,7 @@ class FormatOCRText
         var r = GetOutput("pandoc.exe", $"\"{path}\" -t plain");
         r = Regex.Replace(r, "\r\n\r\n", "\r\n");
         r = Regex.Replace(r, " ", "");
-        r = Regex.Replace(r, "[.•・·]{2,99}", m => new string('…', m.Value.Length / 3));
+        r = Regex.Replace(r, "[.•・·]{2,99}", m => new string('…', (m.Value.Length + 1) / 3 ));
         r = r.Replace("[]", "");//pandoc 处理图片剩下的东西
         var lines = r.Split("\r\n");
         var processedLines = new List<string>();
