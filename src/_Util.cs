@@ -84,4 +84,38 @@ class Util
         .Replace('>', '＞')
         ;
     }
+
+    ///<remarks>
+    ///只实现到百
+    ///</remarks>
+    public static int FromChineseNumber(string s)
+    {
+        if (s == "零") return 0;
+        int r = 0;
+        string dic = "零一二三四五六七八九";
+        int i = s.Length - 1;
+        if (dic.Contains(s[i]))
+        {
+            r += dic.IndexOf(s[i]);
+        }
+        i = s.IndexOf('十');
+        if (i > 0)//几十几
+        {
+            r += dic.IndexOf(s[i - 1]) * 10;
+        }
+        else if (i == 0)//十几
+        {
+            r += 10;
+        }
+        i = s.IndexOf('百');
+        if (i > 0)
+        {
+            r += dic.IndexOf(s[i - 1]) * 100;
+        }
+        if (i == 0)
+        {
+            throw new Exception("第一个字不能是百。");
+        }
+        return r;
+    }
 }
