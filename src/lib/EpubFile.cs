@@ -629,7 +629,22 @@ namespace AeroEpub
         public string href, id, mediaType;
         public string properties;
         //public string fallback, mediaOverlay;
-        public string filePath;
+        /** <summary>Bases on href and packageFilePath</summary> */
+        public string filePath
+        {
+            get
+            {
+                if (href[0] != '/')
+                {
+                    string dir = Path.GetDirectoryName(belongTo.packageFile.fullName);
+                    if (dir != "")
+                        return dir + "/" + href;
+                    else
+                        return href;
+                }
+                else { return href; }
+            }
+        }
         EpubFile belongTo;
         public Item(XmlElement e, EpubFile belongTo, string packageFilePath)
         {
@@ -638,13 +653,7 @@ namespace AeroEpub
             id = e.GetAttribute("id");
             mediaType = e.GetAttribute("media-type");
             properties = e.GetAttribute("properties");
-            if (href[0] != '/')
-            {
-                string dir = Path.GetDirectoryName(packageFilePath);
-                if (dir != "")
-                    filePath = Path.GetDirectoryName(packageFilePath) + "/" + href;
-            }
-            else { filePath = href; }
+
         }
         public Item(EpubFile belongTo, EpubFileEntry entry, string id, string mediaType, string properties)
         {
@@ -675,7 +684,7 @@ namespace AeroEpub
     public class Spine : IEnumerable<Itemref>
     {
         //http://idpf.org/epub/30/spec/epub30-publications.html#sec-spine-elem
-        List<Itemref> items = new List<Itemref>();
+        public List<Itemref> items = new List<Itemref>();
         public Item toc;//For EPUB2
         public string pageProgressionDirection;
         public string id;
@@ -733,6 +742,10 @@ namespace AeroEpub
             id = itemref.GetAttribute("id");
             if (itemref.GetAttribute("linear") == "no") linear = false;
         }
+        public Itemref(string id, Dictionary<string, Item> items)
+        {
+            this.item = items[id];
+        }
         public string href { get { return item.href; } }
         public string filePath { get { return item.filePath; } }
         public override string ToString()
@@ -741,9 +754,9 @@ namespace AeroEpub
             sb.Append("<itemref");
             sb.Append(" linear=\"" + (linear ? "yes" : "no") + "\"");
             sb.Append(" idref=\"" + item.id + "\"");
-            if (id != "")
+            if (!string.IsNullOrEmpty(id))
                 sb.Append(" id=\"" + id + "\"");
-            if (properties != "")
+            if (!string.IsNullOrEmpty(properties))
                 sb.Append(" properties=\"" + properties + "\"");
             sb.Append("/>");
             return sb.ToString();
