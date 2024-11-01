@@ -11,16 +11,40 @@ using System.Collections.Generic;
 /// </summary>
 class FormatOCRText
 {
+    public static void Proc(string path)
+    {
+        Console.WriteLine("[Format OCR Text] Proc: " + path);
+        string result = "";
+        if (File.Exists(path))
+        {
+            Console.WriteLine($"File");
+            result = string.Join("\n", ProcessFile(path));
+        }
+        else if (Directory.Exists(path))
+        {
+            Console.WriteLine($"Directory");
+            result = ProcessDir(path);
+        }
+        else
+        {
+            Console.WriteLine($"Path not exists.");
+            return;
+        }
+        var dst = Path.Combine(Path.GetDirectoryName(path), "ocr_output.atxt");
+        File.WriteAllText(dst, result);
+        Console.WriteLine("Out: " + dst);
+    }
     public static string[] ProcessFile(string path)
     {
-        var r = GetOutput("pandoc.exe", $"\"{path}\" -t plain");
-        r = Regex.Replace(r, "\r\n\r\n", "\r\n");
+        var r = GetOutput("pandoc", $"\"{path}\" -t plain");
+        r = r.Replace("\r", "");
+        r = Regex.Replace(r, "\n\n", "\n");
         r = Regex.Replace(r, " ", "");
         r = Regex.Replace(r, ":", "…");
         r = Regex.Replace(r, "[.•・·]{2,99}", m => new string('…', (m.Value.Length + 1) / 3));
         r = Regex.Replace(r, "…+", "……");
         r = r.Replace("[]", "");//pandoc 处理图片剩下的东西
-        var lines = r.Split("\r\n");
+        var lines = r.Split("\n");
         var processedLines = new List<string>();
         var knownAllow = new string[] {
             "「", "」", "『", "』", "、", "。","々" ,
