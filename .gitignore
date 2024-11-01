@@ -7,3 +7,4 @@ _Program.cs
 *.epub
 *.docx
 *.exe
+.DS_Store
