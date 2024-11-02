@@ -36,7 +36,19 @@ class FormatOCRText
     }
     public static string[] ProcessFile(string path)
     {
-        var r = GetOutput("pandoc", $"\"{path}\" -t plain");
+        string ext = Path.GetExtension(path).ToLower();
+
+        string r = "";
+        switch (ext)
+        {
+            case ".docx":
+                r = GetOutput("pandoc", $"\"{path}\" -t plain");
+                break;
+            case ".txt":
+                r = File.ReadAllText(path);
+                break;
+
+        }
         r = r.Replace("\r", "");
         r = Regex.Replace(r, "\n\n", "\n");
         r = Regex.Replace(r, " ", "");
@@ -170,6 +182,7 @@ class FormatOCRText
     public static string ProcessDir(string path)
     {
         var list = new List<string>(Directory.GetFiles(path, "*.docx"));
+        list.AddRange(Directory.GetFiles(path, "*.txt"));
         list.Sort();
         var result = new List<string>();
         int lastNoramlLine = 1;
