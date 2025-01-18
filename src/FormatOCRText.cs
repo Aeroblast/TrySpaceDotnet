@@ -59,7 +59,7 @@ class FormatOCRText
         var lines = r.Split("\n");
         var processedLines = new List<string>();
         var knownAllow = new string[] {
-            "「", "」", "『", "』", "、", "。","々" ,
+            "「", "」", "『", "』", "、", "。","々", "【", "】",
             "！", "？", "《", "》", "…", "?", "!" ,"*","〝","〟",
             "←", "→", "=", "☆", "♪", "〆", "◇"
             };
