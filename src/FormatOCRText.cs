@@ -145,8 +145,9 @@ class FormatOCRText
                         break;
 
                     default:
-                        Console.WriteLine(rune);
-                        throw new Exception($"File: {Path.GetFileName(path)}\nTarget:{line}");
+                        var msg = $"File: {Path.GetFileName(path)}\nTarget: {line} || " + rune;
+                        Console.WriteLine(msg);
+                        throw new Exception(msg);
                         //sb.Append(rune);break;// for all through
                 }
 
