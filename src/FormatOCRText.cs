@@ -61,7 +61,7 @@ class FormatOCRText
         var knownAllow = new string[] {
             "「", "」", "『", "』", "、", "。","々", "【", "】",
             "！", "？", "《", "》", "…", "?", "!" ,"*","〝","〟",
-            "←", "→", "=", "☆", "♪", "〆", "◇"
+            "←", "→", "=", "☆", "♪", "〆", "◇", "♥"
             };
         var knownForbi = new string[] { "[", "]" };
         var indentChar = new char[] { '『', '「', '（' };
