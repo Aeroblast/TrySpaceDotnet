@@ -123,6 +123,9 @@ class FormatOCRText
                     case "〇":
                         sb.Append('〇');
                         continue;
+                    case "‼":
+                        sb.Append('!!');
+                        continue;
                 }
                 if (Array.Exists(knownAllow, x => s == x))
                 {
