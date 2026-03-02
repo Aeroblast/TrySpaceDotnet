@@ -61,7 +61,7 @@ class FormatOCRText
         var knownAllow = new string[] {
             "「", "」", "『", "』", "、", "。","々", "【", "】",
             "！", "？", "《", "》", "…", "?", "!" ,"*","〝","〟",
-            "←", "→", "=", "☆", "♪", "〆", "◇", "♥", "～"
+            "←", "→", "=", "☆", "♪", "〆", "◇", "♥", "～", "△", "□", "×"
             };
         var knownForbi = new string[] { "[", "]" };
         var indentChar = new char[] { '『', '「', '（' };
@@ -151,10 +151,11 @@ class FormatOCRText
                         break;
 
                     default:
-                        var msg = $"File: {Path.GetFileName(path)}\nTarget: {line} || " + rune;
+                        var msg = $"Unexpected char '{rune}'.\nFile: {Path.GetFileName(path)}\nTarget: {line}\n";
                         Console.WriteLine(msg);
-                        throw new Exception(msg);
-                        //sb.Append(rune);break;// for all through
+                        // throw new Exception(msg);
+                        sb.Append(rune);
+                        break;// for all through
                 }
 
             }
